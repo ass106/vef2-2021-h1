@@ -7,7 +7,21 @@
 
 ## Töflur
 
-##
+- [ ] Sjónvarpsþætti
+- [ ] Sjónvarpsþáttategund
+- [ ] Tengitafla milli sjónvaprsþátta og sjónvarpsþáttategundar
+- [ ] Season af sjónvarpsþáttum
+- [ ] Þætti
+- [ ] Notendur
+- [ ] Tengitafla fyrir notendur og sjónvarpsþætti
+
+## Viðmót
+
+- [ ] Birta töflur
+- [ ] Birta login
+- [ ] Birta signup
+- [ ] Ratings
+- [ ] Merkja (er að horfa... etc)
 
 # Vefforritun 2, 2021, hópverkefni 1 - Verkefnalýsing
 
