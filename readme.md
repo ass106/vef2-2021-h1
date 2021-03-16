@@ -1,4 +1,15 @@
-# Vefforritun 2, 2021, hópverkefni 1
+# TODO
+
+## Notendaumsjón
+- [ ] Óauðkenndur
+- [ ] Notandi
+- [ ] Stjórnandi
+
+## Töflur
+
+##
+
+# Vefforritun 2, 2021, hópverkefni 1 - Verkefnalýsing
 
 Útfæra skal vefþjónustur fyrir sjónvarpsþáttavef:
 
