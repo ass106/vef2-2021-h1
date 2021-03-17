@@ -10,31 +10,33 @@ DROP TABLE IF EXISTS tvusersrelations;
 
 /* Sjónvarpsþáttur */
 CREATE TABLE IF NOT EXISTS series(
-    /* Nafn, strengur, ekki tómt */
-    /* Fyrst sjónvarpað, dagsetning, má vera tóm */
-    /* Í framleiðslu?, boolean */
-    /* „Tagline“, strengur, má vera tóm */
-    /* Mynd, vísun í slóð, ekki tóm */
-    /* Lýsing, strengur, má vera tóm */
-    /* Tungumál, strengur (tæknilega ISO 639-1 kóði fyrir tungumál), krafa en ekki þarf að staðfesta að gildi sé ISO 639-1 */
-    /* Sjónvarpsstöð (e. network), strengur */
-    /* Vefsíða, strengur (url), má vera tómt */
+    id serial primary key,
+    name varchar(128) not null,/* Nafn, strengur, ekki tómt */
+    airDate timestamp with time zone,/* Fyrst sjónvarpað, dagsetning, má vera tóm */
+    inProduction boolean not null default true, /* Í framleiðslu?, boolean */
+    tagline varchar(128), /* „Tagline“, strengur, má vera tóm */
+    image varchar(128) not null, /* Mynd, vísun í slóð, ekki tóm */
+    description varchar(max), /* Lýsing, strengur, má vera tóm */
+    language varchar(25), /* Tungumál, strengur (tæknilega ISO 639-1 kóði fyrir tungumál), krafa en ekki þarf að staðfesta að gildi sé ISO 639-1 */
+    network varchar(128), /* Sjónvarpsstöð (e. network), strengur */
+    url varchar(128) /* Vefsíða, strengur (url), má vera tómt */
 );
 
 /* Sjónvarpsþátta genre */
 CREATE TABLE IF NOT EXISTS genre(
-    /* Nafn, strengur, ekki tómt */
+    name varchar(128) UNIQUE not null/* Nafn, strengur, ekki tómt */
 );
 
 /* Tengitafla series og genre*/
 CREATE TABLE IF NOT EXISTS seriesgenre(
-    /* Vísun í sjónvarpsþátt */
-    /* Vísun í sjónvarpsþáttategund */
+    series series, /* Vísun í sjónvarpsþátt */
+    genre genre /* Vísun í sjónvarpsþáttategund */
 );
 
 CREATE TABLE IF NOT EXISTS season(
-    /* Nafn, strengur, ekki tómt */
-    /* Númer, heiltala, stærri en 0, krafa */
+    id serial primary key,
+    name varchar(128) not null, /* Nafn, strengur, ekki tómt */
+    number integer /* Númer, heiltala, stærri en 0, krafa */
     /* Fyrst sjónvarpað, dagsetning, má vera tóm */
     /* Lýsing, strengur, má vera tóm */
     /* Poster, vísun í slóð, ekki tóm */
@@ -42,6 +44,7 @@ CREATE TABLE IF NOT EXISTS season(
 );
 
 CREATE TABLE IF NOT EXISTS episode(
+    id serial primary key,
     /* Nafn, strengur, ekki tómt */
     /* Númer, heiltala, stærri en 0, krafa */
     /* Fyrst sjónvarpað, dagsetning, má vera tóm */
@@ -50,10 +53,11 @@ CREATE TABLE IF NOT EXISTS episode(
 );
 
 CREATE TABLE IF NOT EXISTS users(
-    /* Notendanafn, einstakt, krafist */
-    /* Netfang, einstakt, krafist */
-    /* Lykilorð, krafist, a.m.k. 10 stafir, geymt sem hash úr bcrypt */
-    /* Stjórnandi, boolean, sjálfgefið false */
+    id serial primary key,
+    username varchar(128) UNIQUE not null, /* Notendanafn, einstakt, krafist */
+    email varchar(128) UNIQUE not null, /* Netfang, einstakt, krafist */
+    password varchar(1280) not null,/* Lykilorð, krafist, a.m.k. 10 stafir, geymt sem hash úr bcrypt */
+    admin boolean default false/* Stjórnandi, boolean, sjálfgefið false */
 );
 
 CREATE TABLE IF NOT EXISTS userseries(
