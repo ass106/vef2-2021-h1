@@ -8,7 +8,8 @@ DROP TABLE IF EXISTS episodes;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS tvusersrelations;
 
-CREATE TABLE IF NOT EXISTS tvshows(
+/* Sjónvarpsþáttur */
+CREATE TABLE IF NOT EXISTS series(
     /* Nafn, strengur, ekki tómt */
     /* Fyrst sjónvarpað, dagsetning, má vera tóm */
     /* Í framleiðslu?, boolean */
@@ -18,19 +19,20 @@ CREATE TABLE IF NOT EXISTS tvshows(
     /* Tungumál, strengur (tæknilega ISO 639-1 kóði fyrir tungumál), krafa en ekki þarf að staðfesta að gildi sé ISO 639-1 */
     /* Sjónvarpsstöð (e. network), strengur */
     /* Vefsíða, strengur (url), má vera tómt */
-  
 );
 
-CREATE TABLE IF NOT EXISTS tvgenres(
+/* Sjónvarpsþátta genre */
+CREATE TABLE IF NOT EXISTS genre(
     /* Nafn, strengur, ekki tómt */
 );
 
-CREATE TABLE IF NOT EXISTS tvrelations(
+/* Tengitafla series og genre*/
+CREATE TABLE IF NOT EXISTS seriesgenre(
     /* Vísun í sjónvarpsþátt */
     /* Vísun í sjónvarpsþáttategund */
 );
 
-CREATE TABLE IF NOT EXISTS tvseasons(
+CREATE TABLE IF NOT EXISTS season(
     /* Nafn, strengur, ekki tómt */
     /* Númer, heiltala, stærri en 0, krafa */
     /* Fyrst sjónvarpað, dagsetning, má vera tóm */
@@ -39,12 +41,12 @@ CREATE TABLE IF NOT EXISTS tvseasons(
     /* Vísun í sjónvarpsþátt */
 );
 
-CREATE TABLE IF NOT EXISTS episodes(
+CREATE TABLE IF NOT EXISTS episode(
     /* Nafn, strengur, ekki tómt */
     /* Númer, heiltala, stærri en 0, krafa */
     /* Fyrst sjónvarpað, dagsetning, má vera tóm */
     /* Lýsing, strengur, má vera tóm */
-    /* Vísun í season */
+    /* Vísun í season */ 
 );
 
 CREATE TABLE IF NOT EXISTS users(
@@ -54,7 +56,7 @@ CREATE TABLE IF NOT EXISTS users(
     /* Stjórnandi, boolean, sjálfgefið false */
 );
 
-CREATE TABLE IF NOT EXISTS tvusersrelations(
+CREATE TABLE IF NOT EXISTS userseries(
     /* Vísun í sjónvarpsþátt */
     /* Vísun í notanda */
     /* Staða, má vera tóm, eitt af Langar að horfa, Er að horfa, Hef horft (hægt að nota strengi eða enum) */
