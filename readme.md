@@ -7,17 +7,17 @@
 
 ## Töflur
 
-- [ ] Sjónvarpsþætti
-- [ ] Sjónvarpsþáttategund
-- [ ] Tengitafla milli sjónvaprsþátta og sjónvarpsþáttategundar
-- [ ] Season af sjónvarpsþáttum
-- [ ] Þætti
-- [ ] Notendur
-- [ ] Tengitafla fyrir notendur og sjónvarpsþætti
+- [x] Sjónvarpsþætti
+- [x] Sjónvarpsþáttategund
+- [x] Tengitafla milli sjónvaprsþátta og sjónvarpsþáttategundar
+- [x] Season af sjónvarpsþáttum
+- [x] Þætti
+- [x] Notendur
+- [x] Tengitafla fyrir notendur og sjónvarpsþætti
 
 ## Viðmót
 
-- [ ] Birta töflur
+- [x] Birta töflur
 - [ ] Birta login
 - [ ] Birta signup
 - [ ] Ratings

@@ -1,51 +1,45 @@
 {
-  "name": "hopverkefni1",
+  "name": "vef2-2021-h1",
   "version": "1.0.0",
-  "description": "Hópverkefni 1, Vigdís, Teitur og Ástráður",
-  "main": "src/app/app.js",
+  "description": "Vefþjónusta",
+  "main": "./src/app.js",
   "scripts": {
     "dev": "nodemon ./src/app.js",
-    "test:eslint": "eslint ./src --fix",
-    "test:stylelint": "stylelint ./public/styles.css",
-    "test": "eslint ./src",
-    "start": "node ./src/app/app.js",
-    "setup": "node ./src/setup.js",
-    "review": "npm run setup & npm run test & npm run start"
+    "test": "eslint *.js **/*.js",
+    "start": "node ./src/app.js",
+    "setup": "node ./src/setup.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ass106/vef2-2021-h1.git"
   },
-  "author": "ass106",
+  "keywords": [
+    "ass"
+  ],
+  "author": "Ástráður, Vigdís og Teitur",
   "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.0.0",
-    "date-fns": "^2.16.1",
-    "dotenv": "^8.2.0",
-    "ejs": "^3.1.5",
-    "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "express-validator": "^6.9.2",
-    "faker": "^5.4.0",
-    "moment": "^2.29.1",
-    "passport": "^0.4.1",
-    "passport-local": "^1.0.0",
-    "pg": "^8.5.1",
-    "pg-format": "^1.0.4",
-    "xss": "^1.0.8"
-  },
-  "devDependencies": {
-    "concurrently": "^5.3.0",
-    "eslint": "^7.18.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1",
-    "nodemon": "^2.0.7",
-    "stylelint": "^13.11.0",
-    "stylelint-config-sass-guidelines": "^8.0.0",
-    "stylelint-config-standard": "^20.0.0"
-  },
   "bugs": {
     "url": "https://github.com/ass106/vef2-2021-h1/issues"
   },
-  "homepage": "https://github.com/ass106/vef2-2021-h1#readme"
+  "homepage": "https://github.com/ass106/vef2-2021-h1#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cloudinary": "^1.25.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.10.0",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.2",
+    "multer-storage-cloudinary": "^4.0.0",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "csv-parser": "^3.0.0",
+    "eslint": "^7.21.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "nodemon": "^2.0.7"
+  }
 }

@@ -26,35 +26,35 @@ CREATE TABLE IF NOT EXISTS Genres(
 
 CREATE TABLE IF NOT EXISTS SerieToGenre(
     id serial PRIMARY KEY,
-    serieId serial,
-    genreId serial,
-    FOREIGN KEY (serieId) REFERENCES Series(id),
-    FOREIGN KEY (genreId) REFERENCES Genres(id)
+    serieId int,
+    genreId int,
+    FOREIGN KEY (serieId) REFERENCES Series(id) ON DELETE CASCADE,
+    FOREIGN KEY (genreId) REFERENCES Genres(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Seasons(
     id serial PRIMARY KEY,
     name varchar(128) NOT NULL,
-    nr integer,
-    CHECK(nr > 0),
+    "number" integer,
+    CHECK("number" > 0),
     airdate timestamp,
     overview text,
     poster varchar(256) NOT NULL,
-    serieId serial,
-    FOREIGN KEY (serieId) REFERENCES Series(id)
+    serieId int,
+    FOREIGN KEY (serieId) REFERENCES Series(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Episodes(
     id serial PRIMARY KEY,
-    serieId integer,
+    serieId int,
     seasonNumber integer,
     name varchar(128) NOT NULL,
-    nr integer,
-    CHECK(nr > 0),
+    "number" integer,
+    CHECK("number" > 0),
     airDate varchar(128),
     serie varchar(128),
     overview text,
-    FOREIGN KEY (serieId) REFERENCES Series(id)
+    FOREIGN KEY (serieId) REFERENCES Series(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Users(
@@ -66,10 +66,10 @@ CREATE TABLE IF NOT EXISTS Users(
 );
 
 CREATE TABLE IF NOT EXISTS SerieToUser(
-    serieId serial,
-    userId serial,
-    status varchar(128),
-    grade integer,
-    FOREIGN KEY (serieId) REFERENCES Series(id),
-    FOREIGN KEY (userId) REFERENCES Users(id)
+    serieId int,
+    userId int,
+    status int,
+    grade int,
+    FOREIGN KEY (serieId) REFERENCES Series(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
 );
