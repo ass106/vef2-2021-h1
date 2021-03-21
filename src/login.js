@@ -14,7 +14,7 @@ const {
 } = process.env;
 
 if (!jwtSecret) {
-  console.error('Vantar jwt secret í .env');
+  console.error('Vantar JWT_SECRET í .env');
   process.exit(1);
 }
 
