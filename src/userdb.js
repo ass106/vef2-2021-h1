@@ -77,7 +77,7 @@ export async function getUserByName(name) {
       return result.rows[0];
     }
   } catch (e) {
-    console.error('Error occured :>> ', e);
+    console.error('Error occured :  ', e);
     return null;
   }
   return false;
@@ -93,7 +93,7 @@ export async function getUserByEmail(email) {
       return result.rows[0];
     }
   } catch (e) {
-    console.error('Error occured :>> ', e);
+    console.error('Error occured :  ', e);
     return null;
   }
   return false;
@@ -107,7 +107,7 @@ export async function getUserById(id) {
       return result.rows[0];
     }
   } catch (e) {
-    console.error('Error occured :>> ', e);
+    console.error('Error occured :  ', e);
     return null;
   }
   return false;
