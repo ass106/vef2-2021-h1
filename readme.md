@@ -1,27 +1,4 @@
-# TODO
 
-## Notendaumsjón
-- [ ] Óauðkenndur
-- [ ] Notandi
-- [ ] Stjórnandi
-
-## Töflur
-
-- [x] Sjónvarpsþætti
-- [x] Sjónvarpsþáttategund
-- [x] Tengitafla milli sjónvaprsþátta og sjónvarpsþáttategundar
-- [x] Season af sjónvarpsþáttum
-- [x] Þætti
-- [x] Notendur
-- [x] Tengitafla fyrir notendur og sjónvarpsþætti
-
-## Viðmót
-
-- [x] Birta töflur
-- [ ] Birta login
-- [ ] Birta signup
-- [ ] Ratings
-- [ ] Merkja (er að horfa... etc)
 
 # Vefforritun 2, 2021, hópverkefni 1 - Verkefnalýsing
 

@@ -4,9 +4,9 @@ import dotenv from 'dotenv';
 import csv from 'csv-parser';
 import cloudinary from 'cloudinary';
 import {
-  createNewSerie,
-  createNewSeason,
-  createNewEpisode,
+  createSerie,
+  createSeason,
+  createEpisode,
   initializeSeriesSequence,
   updateSerieImageById,
   updateSeasonPosterById,
@@ -63,7 +63,7 @@ async function setupEpisodes() {
   fs.createReadStream('./data/episodes.csv')
     .pipe(csv())
     .on('data', async (episode) => {
-      await createNewEpisode(episode);
+      await createEpisode(episode);
     })
     .on('end', async () => {
       console.info('INFO: Finished reading episodes.csv');
@@ -75,7 +75,7 @@ async function setupSeasons() {
   fs.createReadStream('./data/seasons.csv')
     .pipe(csv())
     .on('data', async (season) => {
-      await createNewSeason(season);
+      await createSeason(season);
     })
     .on('end', async () => {
       console.info('Finished reading seasons.csv');
@@ -89,7 +89,7 @@ async function setupSeries() {
   fs.createReadStream('./data/series.csv')
     .pipe(csv())
     .on('data', async (serie) => {
-      await createNewSerie(serie);
+      await createSerie(serie);
     })
     .on('end', async () => {
       await initializeSeriesSequence();

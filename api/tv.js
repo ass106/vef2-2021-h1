@@ -130,7 +130,7 @@ router.post('/:serieId/season',
     const { serieId } = sanitize(req.params);
     req.body.poster = req.file.path;
     req.body.serieId = serieId;
-    const createdSeason = await db.createNewSeason(req.body);
+    const createdSeason = await db.createSeason(req.body);
     if (createdSeason) {
       return res.json({ msg: 'Season created' });
     }
@@ -178,7 +178,7 @@ router.post('/:serieId/season/:seasonNum/episode',
     const episode = sanitize(req.body);
     episode.serieId = serieId;
     episode.season = seasonNum;
-    const result = await db.createNewEpisode(episode);
+    const result = await db.createEpisode(episode);
     if (result) return res.json(result);
     return res.status(404).json({ msg: `Episode creation failed` });
   });
