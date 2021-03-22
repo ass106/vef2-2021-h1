@@ -106,14 +106,14 @@ async function setup() {
   createUser({
     name: 'admin',
     email: 'admin@admin.com',
-    password: '0123456789',
+    password: '1234567890',
   },
   true);
 
   createUser({
     name: 'notAdmin',
     email: 'example@example.com',
-    password: '0123456789',
+    password: '1234567890',
   });
 }
 
