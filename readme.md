@@ -2,7 +2,7 @@
 
 Til þess að keyra verkefnið þarf að vera til .env skrá. Upplýsingarnar sem þarf í þá skrá er að finna í .env.example. Þegar allt er til reiðu skal keyra `npm run setup`. Sú keyrsla setur gögn í gagnagrunnin og gerir þér kleift að keyra verkefnið með `npm run start`.
 
-Þegar sú keyrsla er komin er hægt að notast við tól eins og Postman. Tveir notendur eru nú þegar settir upp
+Þegar sú keyrsla er komin er hægt að notast við tól eins og Postman. Tveir notendur eru nú þegar settir upp:
 ```json
 {
   "name": "notAdmin",
@@ -15,7 +15,8 @@ Til þess að keyra verkefnið þarf að vera til .env skrá. Upplýsingarnar se
   "password": "1234567890",
 }
 ```
-:
+
+Allar breytur skulu færðar inn í body hlut með JSON gögnum.
 
 ### Sjónvarpsþættir
 
