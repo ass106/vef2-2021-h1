@@ -180,7 +180,7 @@ router.post('/:serieId/season/:seasonNum/episode',
     episode.season = seasonNum;
     const result = await db.createEpisode(episode);
     if (result) return res.json(result);
-    return res.status(404).json({ msg: `Episode creation failed` });
+    return res.status(404).json({ msg: 'Episode creation failed' });
   });
 
 // /tv/:id/season/:id/episode/:id

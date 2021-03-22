@@ -6,7 +6,7 @@ import express from 'express';
 import * as db from '../src/db.js';
 import * as userDb from '../src/userdb.js';
 import { createTokenForUser, requireAuthentication, requireAdminAuthentication } from '../src/login.js';
-import * as fr from '../src/form-rules.js'
+import * as fr from '../src/form-rules.js';
 import { getLinks, sanitize } from '../src/utils.js';
 
 export const router = express.Router();

@@ -26,17 +26,17 @@ pool.on('error', (err) => {
 });
 
 export async function query(q, values = []) {
-    const client = await pool.connect();
-    let result = '';
-    try {
-      result = await client.query(q, values);
-    } catch (e) {
-      console.info('Error occured in query >>', e);
-    } finally {
-      await client.release();
-    }
-    return result;
+  const client = await pool.connect();
+  let result = '';
+  try {
+    result = await client.query(q, values);
+  } catch (e) {
+    console.info('Error occured in query >>', e);
+  } finally {
+    await client.release();
   }
+  return result;
+}
 
 export function getLinks(path = '', lengthString, offsetString, limitString) {
   const length = Number(lengthString);

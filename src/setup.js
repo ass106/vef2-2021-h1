@@ -11,7 +11,7 @@ import {
   updateSerieImageById,
   updateSeasonPosterById,
 } from './db.js';
-import { query } from './utils.js'
+import { query } from './utils.js';
 
 import { createUser } from './userdb.js';
 
@@ -102,7 +102,7 @@ async function setupSeries() {
 async function setup() {
   await createTables();
   await setupSeries();
-  
+
   createUser({
     name: 'admin',
     email: 'admin@admin.com',
