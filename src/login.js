@@ -10,11 +10,11 @@ dotenv.config();
 
 const {
   JWT_SECRET: jwtSecret,
-  JWT_TOKENLIFETIME: tokenLifetime,
+  JWT_TOKENLIFETIME: tokenLifetime = 36000,
 } = process.env;
 
 if (!jwtSecret) {
-  console.error('Vantar JWT_SECRET í .env');
+  console.error('Missing JWT_SECRET in .env');
   process.exit(1);
 }
 
@@ -42,12 +42,11 @@ export function createTokenForUser(id) {
   return { token, tokenLifetime };
 }
 
-
 export function optionalAuthentication(req, res, next) {
   return passport.authenticate(
     'jwt',
-    {session: false},
-    (err, user, info) => {
+    { session: false },
+    (err, user) => {
       if (err) {
         next(err);
       }
@@ -59,7 +58,7 @@ export function optionalAuthentication(req, res, next) {
 
       req.user = user;
       return next();
-    }
+    },
   )(req, res, next);
 }
 
@@ -73,9 +72,8 @@ export function requireAuthentication(req, res, next) {
       }
 
       if (!user) {
-        console.info(info.name);
         const error = info.name === 'TokenExpiredError'
-          ? 'expired token' : 'invalid token';
+          ? 'Expired token' : 'Invalid token';
         return res.status(401).json({ error });
       }
 
@@ -95,9 +93,8 @@ export function requireAdminAuthentication(req, res, next) {
       }
 
       if (!user) {
-        console.info(info.name);
         const error = info.name === 'TokenExpiredError'
-          ? 'expired token' : 'invalid token';
+          ? 'Expired token' : 'Invalid token';
         return res.status(401).json({ error });
       }
 

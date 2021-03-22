@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS Episodes(
     "number" integer,
     CHECK("number" > 0),
     airDate varchar(128),
-    serie varchar(128),
     overview text,
     FOREIGN KEY (serieId) REFERENCES Series(id) ON DELETE CASCADE
 );

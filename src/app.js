@@ -1,9 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { router as tvRouter, getGenres, postGenres } from '../api/tv.js';
+import { router as tvRouter } from '../api/tv.js';
 import { router as userRouter } from '../api/users.js';
-import passport, { requireAdminAuthentication } from './login.js';
-import { webtree } from './webtree.js';
+import { router as genreRouter } from '../api/genres.js';
+import passport from './login.js';
+import { tree } from './tree.js';
 
 dotenv.config();
 
@@ -19,13 +20,12 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
-  res.json(webtree);
+  res.json(tree);
 });
 
 app.use('/users', userRouter);
 app.use('/tv', tvRouter);
-app.get('/genres', getGenres);
-app.post('/genres', requireAdminAuthentication, postGenres);
+app.use('/genres', genreRouter);
 
 function notFoundHandler(req, res, next) { // eslint-disable-line
   res.status(404).json({ error: 'Not found' });

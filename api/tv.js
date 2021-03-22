@@ -1,22 +1,15 @@
 import express from 'express';
-import { validationResult } from 'express-validator';
-import cloudinary from 'cloudinary';
 import * as db from '../src/db.js';
-import { upload } from '../src/upload.js';
+import { uploadImage, uploadPoster } from '../src/upload.js';
 import {
-  createTokenForUser,
   requireAuthentication,
   requireAdminAuthentication,
-  optionalAuthentication
+  optionalAuthentication,
 } from '../src/login.js';
+import { getLinks, sanitize } from '../src/utils.js';
 import * as fr from '../src/form-rules.js';
 
 export const router = express.Router();
-
-cloudinary.v2.config({
-  folder: '',
-  allowed_formats: ['jpg', 'png', 'gif'],
-});
 
 // /tv
 router.get('/',
@@ -26,24 +19,16 @@ router.get('/',
     const {
       offset = 0, limit = 10,
     } = req.query;
-
-    const items = await db.getAllFromTable('Series', offset, limit);
-
-    const next = items.length === limit ? { href: `http://localhost:3000/tv?offset=${offset + limit}&limit=${limit}` } : undefined;
-    const prev = offset > 0 ? { href: `http://localhost:3000/tv?offset=${Math.max(offset - limit, 0)}&limit=${limit}` } : undefined;
-
+    const orderBy = 'id';
+    const items = await db.getAllFromTable('Series', '*', offset, limit, orderBy);
     if (items) {
+      const length = await db.getCountOfTable('Series');
+      const _links = getLinks('tv', length, offset, limit);
       return res.json({
         limit,
         offset,
         items,
-        _links: {
-          self: {
-            href: `http://localhost:3000/tv?offset=${offset}&limit=${limit}`
-          },
-          next,
-          prev,
-        },
+        _links,
       });
     }
     return res.status(404).json({ msg: 'Table not found' });
@@ -51,203 +36,273 @@ router.get('/',
 
 router.post('/',
   requireAdminAuthentication,
-  upload.single('image'),
+  uploadImage,
   fr.serieRules(),
   fr.checkValidationResult,
   async (req, res) => {
-    req.body.image = req.file.filename; // eða path
+    req.body.image = req.file.path;
     if (req.body.id) req.body.id = null;
-    const createdSerie = await db.createNewSerie(req.body);
+    const createdSerie = await db.createSerie(req.body);
     if (createdSerie) {
-      return res.json({ msg: 'Serie created' });
+      return res.json(createdSerie);
     }
-
-    return res.json({ err: 'Error creating serie' });
+    return res.status(404).json({ err: 'Error creating serie' });
   });
 
 // /tv/:id
 router.get('/:serieId',
   optionalAuthentication,
-  async (req, res) => {
+  fr.paramIdRules('serieId'),
+  fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res, next) => {
     const { serieId } = req.params;
     let userId;
     if (req.user) {
       userId = req.user.id;
     }
-    const data = await db.getSerieById(serieId, userId);
-    // Ef authenticated þá bæta við einkunn og stöðu
-    if (!data) {
-      return res.status(404).json({ msg: 'Fann ekki sjónvarpsþátt' });
+    const data = await db.getSerieByIdWithSeasons(serieId, userId);
+    if (data) {
+      return res.json({ data });
     }
-    return res.json(data);
+    return next();
   });
 
-router.patch('/:serieId', 
+router.patch('/:serieId',
+  requireAdminAuthentication,
+  uploadImage,
+  fr.paramIdRules('serieId'),
+  fr.patchSerieRules(),
+  fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res) => {
+    const { serieId } = sanitize(req.params);
+    req.body.image = req.file.path;
+    const newSerie = await db.updateSerieById(serieId, req.body);
+    return res.json(newSerie);
+  });
+
+router.delete('/:serieId',
   requireAdminAuthentication,
   fr.paramIdRules('serieId'),
-  fr.serieRules(),
   fr.checkValidationResult,
+  fr.serieExists,
   (req, res) => {
-
     const { serieId } = req.params;
-    console.log(serieId);
-    res.json({error:'not implemented'});
-
-  });
-
-router.delete('/:serieId', 
-  requireAdminAuthentication,
-  fr.paramIdRules('serieId'),
-  fr.checkValidationResult,
-  (req, res) => {
-      const { serieId } = req.params;
-      const deletedSerie = db.deleteSerie(serieId);
-      return res.json(deletedSerie);
+    const deletedSerie = db.deleteSerie(serieId);
+    return res.json(deletedSerie);
   });
 
 // /tv/:id/season/
-router.get('/:serieId/season', async (req, res) => {
-  const { serieId } = req.params;
-  const data = await db.getSeasonsBySerieId(serieId);
-  // Ef authenticated þá bæta við einkunn og stöðu
-  if (!data) {
-    res.status(404).json({ msg: 'Fann ekki þátt' });
-  }
-  res.json({ data });
-});
+router.get('/:serieId/season',
+  fr.paramIdRules('serieId'),
+  fr.paginationRules(),
+  fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res) => {
+    const { serieId } = req.params;
+
+    let {
+      offset = 0, limit = 10,
+    } = req.query;
+    offset = Number.parseInt(offset, 10);
+    limit = Number.parseInt(limit, 10);
+
+    const { data, count } = await db.getSeasonsBySerieId(serieId, offset, limit);
+    const _links = getLinks(`tv/${serieId}/season`, count, offset, limit);
+
+    if (!data) {
+      res.status(404).json({ errors: [{ param: 'id', msg: `Could not find show with serieId: ${serieId}` }] });
+    }
+    res.json({
+      limit, offset, items: data, _links,
+    });
+  });
 
 router.post('/:serieId/season',
   requireAdminAuthentication,
-  upload.single('poster'),
+  uploadPoster,
   fr.seasonRules(),
   fr.checkValidationResult,
+  fr.serieExists,
+  fr.uniqueSeason,
   async (req, res) => {
-    const { serieId } = req.params;
-    req.body.poster = req.file.filename; // eða path
+    const { serieId } = sanitize(req.params);
+    req.body.poster = req.file.path;
     req.body.serieId = serieId;
     const createdSeason = await db.createNewSeason(req.body);
     if (createdSeason) {
       return res.json({ msg: 'Season created' });
     }
-
-    return res.json({ err: 'Error creating season' });
+    return res.status(404).json({ err: 'Error creating season' });
   });
 
 // /tv/:id/season/:id
-router.get('/:serieId/season/:seasonNum', async (req, res) => {
-  const { serieId, seasonNum } = req.params;
-  const season = await db.getSeasonBySerieIdAndSeasonNum(serieId, seasonNum);
-  if (!season) {
-    res.status(404).json({ msg: 'Fann ekki þátt' });
-  }
-  const episodes = await db.getEpisodesBySerieIdAndSeasonNum(serieId, seasonNum);
-  const combined = Object.assign(season, { episodes });
-  res.json({ combined });
-});
+router.get('/:serieId/season/:seasonNum',
+  fr.paramIdRules('serieId'),
+  fr.paramIdRules('seasonNum'),
+  fr.checkValidationResult,
+  fr.seasonExists,
+  async (req, res) => {
+    const { serieId, seasonNum } = req.params;
+    const season = await db.getSeasonBySerieIdAndSeasonNum(serieId, seasonNum);
+    if (!season) {
+      res.status(404).json({ msg: `Could not find show with serieId: ${serieId} + season number: ${seasonNum}` });
+    }
+    const episodes = await db.getEpisodesBySerieIdAndSeasonNum(serieId, seasonNum);
+    const combined = Object.assign(season, { episodes });
+    res.json(combined);
+  });
 
-router.delete('/:serieId/season/:seasonNum', (req, res) => {
-  res.json({ foo: 'bar' });
-});
+router.delete('/:serieId/season/:seasonNum',
+  fr.paramIdRules('serieId'),
+  fr.paramIdRules('seasonNum'),
+  fr.checkValidationResult,
+  fr.seasonExists,
+  async (req, res) => {
+    const { serieId, seasonNum } = req.params;
+    await db.deleteSeasonBySerieIdAndSeasonNumber(serieId, seasonNum);
+    return res.json({});
+  });
 
 // /tv/:id/season/:id/episode/
-router.post('/:serieId/season/:seasonNum/episode', (req, res) => {
-  res.json({ foo: 'bar' });
-});
-
-router.delete('/:serieId/season/:seasonNum/episode', (req, res) => {
-  res.json({ foo: 'bar' });
-});
+router.post('/:serieId/season/:seasonNum/episode',
+  requireAdminAuthentication,
+  fr.paramIdRules('serieId'),
+  fr.paramIdRules('seasonNum'),
+  fr.checkValidationResult,
+  fr.seasonExists,
+  fr.uniqueEpisode,
+  async (req, res) => {
+    const { serieId, seasonNum } = sanitize(req.params);
+    const episode = sanitize(req.body);
+    episode.serieId = serieId;
+    episode.season = seasonNum;
+    const result = await db.createNewEpisode(episode);
+    if (result) return res.json(result);
+    return res.status(404).json({ msg: `Episode creation failed` });
+  });
 
 // /tv/:id/season/:id/episode/:id
-router.get('/:serieId/season/:seasonNum/episode/:episodeNum', async (req, res) => {
-  const { serieId, seasonNum, episodeNum } = req.params;
-  await db.getEpisodeByNo(serieId, seasonNum, episodeNum);
-  if (!data) {
-    res.status(404).json({ msg: 'Fann ekki þátt' });
-  }
-  res.json(data);
-});
+router.get('/:serieId/season/:seasonNum/episode/:episodeNum',
+  fr.paramIdRules('serieId'),
+  fr.paramIdRules('seasonNum'),
+  fr.paramIdRules('episodeNum'),
+  fr.checkValidationResult,
+  fr.episodeExists,
+  async (req, res) => {
+    const { serieId, seasonNum, episodeNum } = req.params;
+    const data = await db.getEpisodeByNo(serieId, seasonNum, episodeNum);
+    if (!data) {
+      res.status('404').json({ msg: `Could not find show with serie id: ${serieId} + season number: ${seasonNum} + episode number ${episodeNum}` });
+    }
+    res.json(data);
+  });
+
+router.delete('/:serieId/season/:seasonNum/episode/:episodeNum',
+  requireAdminAuthentication,
+  fr.paramIdRules('serieId'),
+  fr.paramIdRules('seasonNum'),
+  fr.paramIdRules('episodeNum'),
+  fr.checkValidationResult,
+  fr.episodeExists,
+  async (req, res) => {
+    const { serieId, seasonNum, episodeNum } = req.params;
+    const del = await db.deleteEpisode(episodeNum, serieId, seasonNum);
+    if (del) return res.json({ msg: 'Episode has been deleted' });
+    return res.status(404).json({ msg: 'Episode deletion failed' });
+  });
 
 router.post('/:serieId/rate',
   requireAuthentication,
   fr.paramIdRules('serieId'),
   fr.ratingRules(),
   fr.checkValidationResult,
+  fr.serieExists,
   async (req, res) => {
-    const { serieId } = req.params;
-    const { grade } = req.body;
-    const userId = req.user.id;
-    let data;
-    data = await db.createUserRatingBySerieId(serieId, userId, grade);
-    if(!data) {
-      return res.status(404).json({ msg: 'Uppfærsla tókst ekki' });
+    const { serieId } = sanitize(req.params);
+    const { grade } = sanitize(req.body);
+    const userId = sanitize(req.user.id);
+    const data = await db.createUserRatingBySerieId(serieId, userId, grade);
+    if (!data) {
+      return res.status(404).json({ msg: 'Update unsuccessful' });
     }
-    return res.json({msg: 'Uppfærsla tókst'});
+    return res.json(data);
   });
 
-router.patch('/:serieId/rate', 
+router.patch('/:serieId/rate',
   requireAuthentication,
   fr.paramIdRules('serieId'),
   fr.ratingRules(),
   fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res) => {
+    const { serieId } = sanitize(req.params);
+    const { grade } = sanitize(req.body);
+    const userId = sanitize(req.user.id);
+    const data = await db.updateUserRatingBySerieId(serieId, userId, grade);
+    if (!data) {
+      return res.status(404).json({ msg: 'Update unsuccessful' });
+    }
+    return res.json(data);
+  });
+
+router.delete('/:serieId/rate',
+  requireAuthentication,
+  fr.paramIdRules('serieId'),
+  fr.checkValidationResult,
+  fr.serieExists,
   async (req, res) => {
     const { serieId } = req.params;
-    const { grade } = req.body;
     const userId = req.user.id;
-    let data = await db.updateUserRatingBySerieId(serieId, userId, grade);
-    if(!data) {
-      return res.status(404).json({ msg: 'Uppfærsla tókst ekki' });
-    }
-    return res.json({msg: 'Uppfærsla tókst'});
-});
-
-router.delete('/:serieId/rate', (req, res) => {
-  res.json({ foo: 'bar' });
-});
-
-router.post('/serieId/state', (req, res) => {
-  res.json({ foo: 'bar' });
-});
-
-router.patch('/serieId/state', (req, res) => {
-  res.json({ foo: 'bar' });
-});
-
-router.delete('/serieId/state', (req, res) => {
-  res.json({ foo: 'bar' });
-});
-
-export const getGenres = async (req, res) => {
-  const {
-    offset = 0,
-    limit = 10,
-  } = req.query;
-  const genres = await db.getAllFromTable('Genres', offset, limit);
-  const next = genres.length === limit ? { href: `http://localhost:3000/genres?offset=${offset + limit}&limit=${limit}` } : undefined;
-  const prev = offset > 0 ? { href: `http://localhost:3000/genres?offset=${Math.max(offset - limit, 0)}&limit=${limit}` } : undefined;
-  console.log(genres);
-  res.json({
-    offset: offset,
-    limit: limit,
-    genres,
-    _links: {
-      prev,
-      self: {
-        href: `localhost:3000/genres?offset=${offset}&limit=${limit}`,
-      },
-      next,
-    },
+    const del = await db.deleteUserData(serieId, userId);
+    if (del) return res.json({});
+    return res.status(404).json({ msg: 'Deletion failed' });
   });
-};
 
-export const postGenres = async (req, res) => {
-  const {
-    name,
-  } = req.body;
-  const q = 'INSERT INTO Genres(name) VALUES ($1) RETURNING *;';
-  const result = await db.query(q, [name]);
-  if (!result) {
-    res.status(400).json({ err: 'Genre er nú þegar til' });
-  }
-  res.json(result.rows);
-};
+router.post('/:serieId/state',
+  requireAuthentication,
+  fr.paramIdRules('serieId'),
+  fr.statusRules(),
+  fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res) => {
+    const { serieId } = sanitize(req.params);
+    const { status } = sanitize(req.body);
+    const userId = sanitize(req.user.id);
+    const data = await db.createUserStatusBySerieId(serieId, userId, status);
+    if (!data) {
+      return res.status(404).json({ msg: 'Update unsuccessful' });
+    }
+    return res.json(data);
+  });
+
+router.patch('/:serieId/state',
+  requireAuthentication,
+  fr.paramIdRules('serieId'),
+  fr.statusRules(),
+  fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res) => {
+    const { serieId } = sanitize(req.params);
+    const { status } = sanitize(req.body);
+    const userId = sanitize(req.user.id);
+    const data = await db.updateUserStatusBySerieId(serieId, userId, status);
+    if (!data) {
+      return res.status(404).json({ msg: 'Update unsuccessful' });
+    }
+    return res.json(data);
+  });
+
+router.delete('/:serieId/state',
+  requireAuthentication,
+  fr.paramIdRules('serieId'),
+  fr.checkValidationResult,
+  fr.serieExists,
+  async (req, res) => {
+    const { serieId } = req.params;
+    const userId = req.user.id;
+    const del = await db.deleteSerie(serieId, userId);
+    if (del) return res.json({});
+    return res.status(404).json({ msg: 'Deletion failed' });
+  });
