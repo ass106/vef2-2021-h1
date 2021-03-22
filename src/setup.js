@@ -78,7 +78,7 @@ async function setupSeasons() {
       await createSeason(season);
     })
     .on('end', async () => {
-      console.info('Finished reading seasons.csv');
+      console.info('INFO: Finished reading seasons.csv');
       setTimeout(async () => uploadSeasonPosters(), 2000);
       setTimeout(async () => setupEpisodes(), 2000);
     });
